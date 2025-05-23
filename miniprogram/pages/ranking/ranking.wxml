@@ -1,0 +1,66 @@
+
+<view class="container">
+  <view class="card">
+    <view class="card-header">
+      <text class="card-title">🏆 私董会运动排行榜</text>
+    </view>
+    <view class="card-content">
+      <view wx:for="{{rankingData}}" wx:key="rank" class="ranking-item">
+        <view style="display: flex; align-items: center; gap: 20rpx;">
+          <view class="rank-number rank-{{item.rank <= 3 ? item.rank : 'other'}}">
+            {{item.rank}}
+          </view>
+          <view>
+            <view style="font-weight: 600; color: #333; font-size: 30rpx;">{{item.name}}</view>
+            <view style="color: #666; font-size: 24rpx;">{{item.score}} 积分</view>
+          </view>
+        </view>
+        <view style="color: {{item.change.includes('+') ? '#4caf50' : item.change.includes('-') ? '#f44336' : '#999'}}; font-size: 28rpx; font-weight: 600;">
+          {{item.change}}
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 我的排名 -->
+  <view class="card">
+    <view class="card-header">
+      <text class="card-title">我的排名</text>
+    </view>
+    <view class="card-content">
+      <view class="my-ranking">
+        <view class="rank-info">
+          <view class="my-rank">第 {{myRank.rank}} 名</view>
+          <view class="my-score">{{myRank.score}} 积分</view>
+        </view>
+        <view class="rank-stats">
+          <view class="stat-item">
+            <view class="stat-value">{{myRank.totalDays}}</view>
+            <view class="stat-label">运动天数</view>
+          </view>
+          <view class="stat-item">
+            <view class="stat-value">{{myRank.totalHours}}</view>
+            <view class="stat-label">运动时长</view>
+          </view>
+          <view class="stat-item">
+            <view class="stat-value">{{myRank.avgScore}}</view>
+            <view class="stat-label">平均分</view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 积分规则 -->
+  <view class="card">
+    <view class="card-header">
+      <text class="card-title">📋 积分规则</text>
+    </view>
+    <view class="card-content">
+      <view wx:for="{{scoreRules}}" wx:key="index" class="rule-item">
+        <view class="rule-desc">{{item.desc}}</view>
+        <view class="rule-score">+{{item.score}}分</view>
+      </view>
+    </view>
+  </view>
+</view>

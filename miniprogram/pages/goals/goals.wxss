@@ -1,0 +1,155 @@
+
+.goal-progress {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  margin-bottom: 20rpx;
+}
+
+.goal-circle {
+  text-align: center;
+  z-index: 2;
+}
+
+.goal-number {
+  font-size: 72rpx;
+  font-weight: bold;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.goal-total {
+  font-size: 24rpx;
+  color: #666;
+}
+
+.goal-desc {
+  text-align: center;
+  color: #666;
+  font-size: 28rpx;
+}
+
+.sport-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20rpx;
+}
+
+.sport-item {
+  text-align: center;
+  padding: 30rpx;
+  background: linear-gradient(135deg, #f8faff, #e8f0ff);
+  border-radius: 16rpx;
+}
+
+.sport-icon {
+  font-size: 48rpx;
+  margin-bottom: 16rpx;
+}
+
+.sport-name {
+  font-size: 28rpx;
+  color: #333;
+  margin-bottom: 8rpx;
+}
+
+.sport-count {
+  font-size: 24rpx;
+  color: #667eea;
+  font-weight: 600;
+}
+
+.goal-setting {
+  margin-bottom: 20rpx;
+}
+
+.setting-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24rpx 0;
+  border-bottom: 1rpx solid #eee;
+}
+
+.setting-item:last-child {
+  border-bottom: none;
+}
+
+.setting-label {
+  font-size: 28rpx;
+  color: #333;
+}
+
+.setting-control {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+}
+
+.control-btn {
+  width: 60rpx;
+  height: 60rpx;
+  border-radius: 50%;
+  background: #667eea;
+  color: white;
+  border: none;
+  font-size: 32rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.setting-value {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #333;
+  min-width: 80rpx;
+  text-align: center;
+}
+
+.achievement-item {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+  padding: 24rpx 0;
+  border-bottom: 1rpx solid #eee;
+  opacity: 0.5;
+}
+
+.achievement-item:last-child {
+  border-bottom: none;
+}
+
+.achievement-item.completed {
+  opacity: 1;
+}
+
+.achievement-icon {
+  font-size: 48rpx;
+  width: 80rpx;
+  text-align: center;
+}
+
+.achievement-info {
+  flex: 1;
+}
+
+.achievement-title {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8rpx;
+}
+
+.achievement-desc {
+  font-size: 24rpx;
+  color: #666;
+}
+
+.achievement-check {
+  font-size: 32rpx;
+  color: #4caf50;
+  font-weight: bold;
+}

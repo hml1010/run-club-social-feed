@@ -1,0 +1,87 @@
+
+.card-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #333;
+}
+
+.feed-item {
+  margin-bottom: 40rpx;
+}
+
+.feed-item:last-child {
+  margin-bottom: 0;
+}
+
+.goal-item {
+  margin-bottom: 24rpx;
+}
+
+.goal-item:last-child {
+  margin-bottom: 0;
+}
+
+/* 模态框样式 */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  margin: 40rpx;
+  padding: 40rpx;
+  border-radius: 20rpx;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.form-group {
+  margin-bottom: 32rpx;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 16rpx;
+  color: #333;
+  font-weight: 500;
+}
+
+.form-input, .form-textarea {
+  width: 100%;
+  padding: 20rpx;
+  border: 2rpx solid #eee;
+  border-radius: 12rpx;
+  font-size: 28rpx;
+  box-sizing: border-box;
+}
+
+.form-textarea {
+  height: 120rpx;
+  resize: none;
+}
+
+.picker-text {
+  padding: 20rpx;
+  border: 2rpx solid #eee;
+  border-radius: 12rpx;
+  color: #333;
+}
+
+.btn-secondary {
+  background: #f5f5f5;
+  color: #666;
+  border: none;
+  border-radius: 20rpx;
+  padding: 24rpx 48rpx;
+  font-size: 28rpx;
+  flex: 1;
+}

@@ -1,0 +1,56 @@
+
+{
+  "pages": [
+    "pages/index/index",
+    "pages/ranking/ranking",
+    "pages/goals/goals",
+    "pages/profile/profile",
+    "pages/checkin/checkin"
+  ],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#667eea",
+    "navigationBarTitleText": "老胡私董会",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#f8faff"
+  },
+  "tabBar": {
+    "color": "#7A7E83",
+    "selectedColor": "#667eea",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "iconPath": "images/home.png",
+        "selectedIconPath": "images/home-active.png",
+        "text": "动态"
+      },
+      {
+        "pagePath": "pages/ranking/ranking",
+        "iconPath": "images/ranking.png",
+        "selectedIconPath": "images/ranking-active.png",
+        "text": "排行榜"
+      },
+      {
+        "pagePath": "pages/goals/goals",
+        "iconPath": "images/target.png",
+        "selectedIconPath": "images/target-active.png",
+        "text": "目标"
+      },
+      {
+        "pagePath": "pages/profile/profile",
+        "iconPath": "images/user.png",
+        "selectedIconPath": "images/user-active.png",
+        "text": "我的"
+      }
+    ]
+  },
+  "permission": {
+    "scope.userLocation": {
+      "desc": "用于记录运动地点"
+    }
+  },
+  "requiredBackgroundModes": ["audio"],
+  "cloud": true
+}

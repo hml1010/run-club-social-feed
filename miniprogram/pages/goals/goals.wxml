@@ -1,0 +1,84 @@
+
+<view class="container">
+  <!-- 本月目标 -->
+  <view class="card">
+    <view class="card-header">
+      <text class="card-title">📅 本月目标</text>
+    </view>
+    <view class="card-content">
+      <view class="goal-progress">
+        <view class="goal-circle">
+          <view class="goal-number">{{monthlyGoal.current}}</view>
+          <view class="goal-total">/ {{monthlyGoal.target}} 天</view>
+        </view>
+        <view class="progress-ring">
+          <view class="progress-fill" style="stroke-dasharray: {{monthlyGoal.progress}}, 100;"></view>
+        </view>
+      </view>
+      <view class="goal-desc">本月运动打卡</view>
+    </view>
+  </view>
+
+  <!-- 运动类型统计 -->
+  <view class="card">
+    <view class="card-header">
+      <text class="card-title">📊 运动类型统计</text>
+    </view>
+    <view class="card-content">
+      <view class="sport-grid">
+        <view wx:for="{{sportStats}}" wx:key="index" class="sport-item">
+          <view class="sport-icon">{{item.icon}}</view>
+          <view class="sport-name">{{item.name}}</view>
+          <view class="sport-count">{{item.count}}次</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 周目标设置 -->
+  <view class="card">
+    <view class="card-header">
+      <text class="card-title">🎯 周目标设置</text>
+    </view>
+    <view class="card-content">
+      <view class="goal-setting">
+        <view class="setting-item">
+          <text class="setting-label">每周运动天数</text>
+          <view class="setting-control">
+            <button class="control-btn" bindtap="decreaseGoal" data-type="days">-</button>
+            <text class="setting-value">{{weeklyGoals.days}}</text>
+            <button class="control-btn" bindtap="increaseGoal" data-type="days">+</button>
+          </view>
+        </view>
+        
+        <view class="setting-item">
+          <text class="setting-label">每周运动时长 (分钟)</text>
+          <view class="setting-control">
+            <button class="control-btn" bindtap="decreaseGoal" data-type="duration">-</button>
+            <text class="setting-value">{{weeklyGoals.duration}}</text>
+            <button class="control-btn" bindtap="increaseGoal" data-type="duration">+</button>
+          </view>
+        </view>
+      </view>
+      
+      <button class="btn-primary" bindtap="saveGoals" style="margin-top: 40rpx;">保存目标</button>
+    </view>
+  </view>
+
+  <!-- 历史成就 -->
+  <view class="card">
+    <view class="card-header">
+      <text class="card-title">🏅 历史成就</text>
+    </view>
+    <view class="card-content">
+      <view wx:for="{{achievements}}" wx:key="index" class="achievement-item {{item.completed ? 'completed' : ''}}">
+        <view class="achievement-icon">{{item.icon}}</view>
+        <view class="achievement-info">
+          <view class="achievement-title">{{item.title}}</view>
+          <view class="achievement-desc">{{item.desc}}</view>
+        </view>
+        <view wx:if="{{item.completed}}" class="achievement-check">✓</view>
+      </view>
+    </view>
+  </view>
+</view>

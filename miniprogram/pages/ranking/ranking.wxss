@@ -1,0 +1,51 @@
+
+.my-ranking {
+  text-align: center;
+}
+
+.rank-info {
+  margin-bottom: 30rpx;
+}
+
+.my-rank {
+  font-size: 48rpx;
+  font-weight: bold;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 10rpx;
+}
+
+.my-score {
+  font-size: 28rpx;
+  color: #666;
+}
+
+.rank-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20rpx;
+}
+
+.rule-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid #eee;
+}
+
+.rule-item:last-child {
+  border-bottom: none;
+}
+
+.rule-desc {
+  color: #333;
+  font-size: 28rpx;
+}
+
+.rule-score {
+  color: #667eea;
+  font-weight: 600;
+  font-size: 28rpx;
+}

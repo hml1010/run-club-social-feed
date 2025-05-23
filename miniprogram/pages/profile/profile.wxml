@@ -1,0 +1,57 @@
+
+<view class="container">
+  <!-- 用户信息卡片 -->
+  <view class="card">
+    <view class="card-content">
+      <view class="profile-header">
+        <image class="profile-avatar" src="{{userInfo.avatarUrl}}" mode="aspectFill"></image>
+        <view class="profile-info">
+          <view class="profile-name">{{userInfo.nickName}}</view>
+          <view class="profile-title">私董会成员</view>
+          <view class="profile-badge">连续打卡 {{userInfo.consecutiveDays}} 天</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 统计数据 -->
+  <view class="card">
+    <view class="card-header">
+      <text class="card-title">📊 我的数据</text>
+    </view>
+    <view class="card-content">
+      <view class="stats-grid">
+        <view class="stat-item">
+          <view class="stat-value">{{userStats.totalScore}}</view>
+          <view class="stat-label">总积分</view>
+        </view>
+        <view class="stat-item">
+          <view class="stat-value">{{userStats.totalDays}}</view>
+          <view class="stat-label">运动天数</view>
+        </view>
+        <view class="stat-item">
+          <view class="stat-value">{{userStats.totalHours}}</view>
+          <view class="stat-label">运动时长</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 功能菜单 -->
+  <view class="card">
+    <view class="card-content">
+      <view wx:for="{{menuItems}}" wx:key="index" class="menu-item" bindtap="onMenuTap" data-action="{{item.action}}">
+        <view class="menu-icon">{{item.icon}}</view>
+        <view class="menu-text">{{item.title}}</view>
+        <view class="menu-arrow">></view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 设置按钮 -->
+  <view class="card">
+    <view class="card-content">
+      <button class="btn-logout" bindtap="logout">退出登录</button>
+    </view>
+  </view>
+</view>

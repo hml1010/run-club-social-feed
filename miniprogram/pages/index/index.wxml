@@ -1,0 +1,154 @@
+
+<view class="container">
+  <!-- 运动打卡按钮 -->
+  <view class="card">
+    <view class="card-content">
+      <button class="btn-primary" bindtap="showCheckinModal">
+        <text>🏃‍♂️ 运动打卡</text>
+      </button>
+    </view>
+  </view>
+
+  <!-- 本周目标卡片 -->
+  <view class="card">
+    <view class="card-header">
+      <view style="display: flex; align-items: center; gap: 16rpx;">
+        <text>🎯</text>
+        <text class="card-title">本周目标</text>
+      </view>
+    </view>
+    <view class="card-content">
+      <view class="goal-item">
+        <view style="display: flex; justify-content: space-between; margin-bottom: 16rpx;">
+          <text>运动天数</text>
+          <text>{{weeklyStats.days}} / 5 天</text>
+        </view>
+        <view class="progress-bar">
+          <view class="progress-fill" style="width: {{weeklyStats.daysProgress}}%;"></view>
+        </view>
+      </view>
+      
+      <view class="goal-item" style="margin-top: 32rpx;">
+        <view style="display: flex; justify-content: space-between; margin-bottom: 16rpx;">
+          <text>运动时长</text>
+          <text>{{weeklyStats.duration}} / 300 分钟</text>
+        </view>
+        <view class="progress-bar">
+          <view class="progress-fill" style="width: {{weeklyStats.durationProgress}}%;"></view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 运动动态 -->
+  <view class="card">
+    <view class="card-header">
+      <text class="card-title">最新动态</text>
+    </view>
+    <view class="card-content">
+      <view wx:for="{{feedData}}" wx:key="id" class="feed-item">
+        <view class="user-info">
+          <image class="avatar" src="{{item.user.avatar}}" mode="aspectFill"></image>
+          <view>
+            <view class="user-name">{{item.user.name}}</view>
+            <view class="user-level">{{item.user.level}}</view>
+            <view style="color: #999; font-size: 24rpx; margin-top: 8rpx;">{{item.time}}</view>
+          </view>
+        </view>
+        
+        <view style="margin: 20rpx 0; color: #333; line-height: 1.6;">
+          {{item.description}}
+        </view>
+        
+        <view class="stats-grid">
+          <view class="stat-item">
+            <view class="stat-value">{{item.duration}}</view>
+            <view class="stat-label">时长</view>
+          </view>
+          <view class="stat-item" wx:if="{{item.distance}}">
+            <view class="stat-value">{{item.distance}}</view>
+            <view class="stat-label">距离</view>
+          </view>
+          <view class="stat-item">
+            <view class="stat-value">{{item.calories}}</view>
+            <view class="stat-label">卡路里</view>
+          </view>
+        </view>
+        
+        <view style="display: flex; align-items: center; gap: 16rpx; margin-top: 20rpx; color: #999;">
+          <text>📍 {{item.location}}</text>
+        </view>
+        
+        <view style="display: flex; justify-content: space-between; margin-top: 20rpx; padding-top: 20rpx; border-top: 1rpx solid #eee;">
+          <view bindtap="toggleLike" data-id="{{item.id}}" style="display: flex; align-items: center; gap: 8rpx; color: #667eea;">
+            <text>❤️</text>
+            <text>{{item.likes}}</text>
+          </view>
+          <view style="display: flex; align-items: center; gap: 8rpx; color: #667eea;">
+            <text>💬</text>
+            <text>{{item.comments}}</text>
+          </view>
+        </view>
+        
+        <view wx:if="{{index < feedData.length - 1}}" style="height: 1rpx; background: #eee; margin: 40rpx 0;"></view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 本周排行榜预览 -->
+  <view class="card">
+    <view class="card-header">
+      <view style="display: flex; justify-content: space-between; align-items: center;">
+        <text class="card-title">🏆 本周排行</text>
+        <text bindtap="goToRanking" style="color: #667eea; font-size: 28rpx;">查看更多 ></text>
+      </view>
+    </view>
+    <view class="card-content">
+      <view wx:for="{{topRanking}}" wx:key="rank" class="ranking-item">
+        <view style="display: flex; align-items: center; gap: 20rpx;">
+          <view class="rank-number rank-{{item.rank <= 3 ? item.rank : 'other'}}">
+            {{item.rank}}
+          </view>
+          <view>
+            <view style="font-weight: 600; color: #333;">{{item.name}}</view>
+            <view style="color: #666; font-size: 24rpx;">{{item.score}} 积分</view>
+          </view>
+        </view>
+        <view style="color: {{item.change.includes('+') ? '#4caf50' : item.change.includes('-') ? '#f44336' : '#999'}}; font-size: 24rpx;">
+          {{item.change}}
+        </view>
+      </view>
+    </view>
+  </view>
+</view>
+
+<!-- 打卡模态框 -->
+<view wx:if="{{showCheckin}}" class="modal-overlay" bindtap="hideCheckinModal">
+  <view class="modal-content" catchtap="stopPropagation">
+    <view style="text-align: center; margin-bottom: 40rpx;">
+      <text style="font-size: 36rpx; font-weight: bold;">运动打卡</text>
+    </view>
+    
+    <view class="form-group">
+      <text class="form-label">运动类型</text>
+      <picker range="{{sportTypes}}" value="{{checkinForm.sportIndex}}" bindchange="onSportChange">
+        <view class="picker-text">{{sportTypes[checkinForm.sportIndex]}}</view>
+      </picker>
+    </view>
+    
+    <view class="form-group">
+      <text class="form-label">运动时长 (分钟)</text>
+      <input class="form-input" type="number" placeholder="请输入运动时长" value="{{checkinForm.duration}}" bindinput="onDurationInput" />
+    </view>
+    
+    <view class="form-group">
+      <text class="form-label">今日感受</text>
+      <textarea class="form-textarea" placeholder="分享一下今天的运动心得..." value="{{checkinForm.description}}" bindinput="onDescriptionInput"></textarea>
+    </view>
+    
+    <view style="display: flex; gap: 20rpx; margin-top: 40rpx;">
+      <button class="btn-secondary" bindtap="hideCheckinModal">取消</button>
+      <button class="btn-primary" bindtap="submitCheckin">提交打卡</button>
+    </view>
+  </view>
+</view>
