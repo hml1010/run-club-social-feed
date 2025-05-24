@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "wechaty": "^1.20.2",
-    "wechaty-puppet-wechat": "^1.18.4",
+    "wechaty-puppet-wechat4u": "^1.14.11",
     "node-cron": "^3.0.2",
     "moment": "^2.29.4",
     "fs-extra": "^11.1.1"

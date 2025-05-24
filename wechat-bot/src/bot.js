@@ -1,3 +1,4 @@
+
 const { WechatyBuilder } = require('wechaty');
 const cron = require('node-cron');
 const moment = require('moment');
@@ -12,7 +13,7 @@ class SportsCheckinBot {
   constructor() {
     this.bot = WechatyBuilder.build({
       name: 'sports-checkin-bot',
-      puppet: 'wechaty-puppet-wechat'
+      puppet: 'wechaty-puppet-wechat4u'
     });
     
     this.checkinManager = new CheckinManager();
