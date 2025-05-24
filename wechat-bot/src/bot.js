@@ -84,12 +84,7 @@ class SportsCheckinBot {
   }
 
   isCheckinMessage(text) {
-    const checkinKeywords = [
-      '打卡', '运动', '健身', '跑步', '网球', 
-      '游泳', '瑜伽', '登山', '骑行', '篮球'
-    ];
-    
-    return checkinKeywords.some(keyword => text.includes(keyword));
+    return config.CHECKIN_KEYWORDS.some(keyword => text.includes(keyword));
   }
 
   async handleCheckin(room, contact, message) {
@@ -97,7 +92,8 @@ class SportsCheckinBot {
     const today = moment().format('YYYY-MM-DD');
     
     // 检查是否已经打卡
-    if (this.checkinManager.hasCheckedToday(userName, today)) {
+    const hasChecked = await this.checkinManager.hasCheckedToday(userName, today);
+    if (hasChecked) {
       await room.say(`@${userName} 您今天已经打卡过了哦！💪`);
       return;
     }
@@ -111,11 +107,11 @@ class SportsCheckinBot {
       timestamp: Date.now()
     };
     
-    this.checkinManager.addCheckin(checkinData);
+    await this.checkinManager.addCheckin(checkinData);
     
     // 回复确认
-    const todayCount = this.checkinManager.getTodayCount(today);
-    const streak = this.checkinManager.getUserStreak(userName);
+    const todayCount = await this.checkinManager.getTodayCount(today);
+    const streak = await this.checkinManager.getUserStreak(userName);
     
     await room.say(
       `✅ @${userName} 打卡成功！\n` +
@@ -127,8 +123,8 @@ class SportsCheckinBot {
 
   async handleStatsQuery(room) {
     const today = moment().format('YYYY-MM-DD');
-    const stats = this.checkinManager.getTodayStats(today);
-    const ranking = this.checkinManager.getWeeklyRanking();
+    const stats = await this.checkinManager.getTodayStats(today);
+    const ranking = await this.checkinManager.getWeeklyRanking();
     
     let message = `📊 今日打卡统计 (${today})\n\n`;
     message += `✅ 已打卡: ${stats.checkedUsers.length}人\n`;
@@ -181,7 +177,7 @@ class SportsCheckinBot {
 
   setupScheduledTasks() {
     // 每日9点提醒
-    cron.schedule('0 9 * * *', async () => {
+    cron.schedule(config.REMINDERS.MORNING, async () => {
       if (this.targetRoom) {
         await this.targetRoom.say(
           '🌅 早上好！新的一天开始了！\n' +
@@ -189,13 +185,13 @@ class SportsCheckinBot {
           '发送运动相关消息即可打卡！'
         );
       }
-    }, { timezone: 'Asia/Shanghai' });
+    }, { timezone: config.TIMEZONE });
 
     // 每日18点提醒
-    cron.schedule('0 18 * * *', async () => {
+    cron.schedule(config.REMINDERS.EVENING, async () => {
       if (this.targetRoom) {
         const today = moment().format('YYYY-MM-DD');
-        const stats = this.checkinManager.getTodayStats(today);
+        const stats = await this.checkinManager.getTodayStats(today);
         
         await this.targetRoom.say(
           `🌆 晚上好！今日打卡统计：\n` +
@@ -203,15 +199,15 @@ class SportsCheckinBot {
           `⏰ 还没运动的朋友抓紧时间哦！`
         );
       }
-    }, { timezone: 'Asia/Shanghai' });
+    }, { timezone: config.TIMEZONE });
 
     // 每周一早上发送上周总结
-    cron.schedule('0 9 * * 1', async () => {
+    cron.schedule(config.REMINDERS.WEEKLY, async () => {
       if (this.targetRoom) {
-        const weeklyReport = this.checkinManager.getWeeklyReport();
+        const weeklyReport = await this.checkinManager.getWeeklyReport();
         await this.targetRoom.say(weeklyReport);
       }
-    }, { timezone: 'Asia/Shanghai' });
+    }, { timezone: config.TIMEZONE });
   }
 
   start() {
