@@ -1,0 +1,49 @@
+
+<view class="container">
+  <view class="card">
+    <view class="card-header">
+      <text style="font-size: 36rpx; font-weight: bold;">🏃‍♂️ 运动打卡</text>
+    </view>
+    <view class="card-content">
+      <view class="form-group">
+        <text class="form-label">运动类型</text>
+        <picker range="{{sportTypes}}" value="{{checkinForm.sportIndex}}" bindchange="onSportChange">
+          <view class="picker-text">{{sportTypes[checkinForm.sportIndex]}}</view>
+        </picker>
+      </view>
+      
+      <view class="form-group">
+        <text class="form-label">运动时长 (分钟)</text>
+        <input class="form-input" type="number" placeholder="请输入运动时长" value="{{checkinForm.duration}}" bindinput="onDurationInput" />
+      </view>
+      
+      <view class="form-group">
+        <text class="form-label">运动地点</text>
+        <view class="location-text">📍 {{checkinForm.location}}</view>
+      </view>
+      
+      <view class="form-group">
+        <text class="form-label">添加照片</text>
+        <view class="image-upload">
+          <view wx:for="{{imageList}}" wx:key="index" class="image-item">
+            <image src="{{item}}" mode="aspectFill" class="upload-image"></image>
+            <view class="delete-btn" bindtap="deleteImage" data-index="{{index}}">×</view>
+          </view>
+          <view wx:if="{{imageList.length < 3}}" class="add-image" bindtap="chooseImage">
+            <text>📷</text>
+            <text>添加照片</text>
+          </view>
+        </view>
+      </view>
+      
+      <view class="form-group">
+        <text class="form-label">今日感受</text>
+        <textarea class="form-textarea" placeholder="分享一下今天的运动心得..." value="{{checkinForm.description}}" bindinput="onDescriptionInput"></textarea>
+      </view>
+      
+      <button class="btn-primary" bindtap="submitCheckin" style="margin-top: 40rpx; width: 100%;">
+        提交打卡
+      </button>
+    </view>
+  </view>
+</view>
