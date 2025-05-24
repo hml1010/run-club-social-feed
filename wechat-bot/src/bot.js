@@ -90,8 +90,12 @@ class SportsCheckinBot {
         logger.info('找到目标群聊', { roomTopic });
         console.log(`🎯 找到目标群聊: ${roomTopic}`);
         
-        // 发送启动消息
-        await this.sendWelcomeMessage();
+        // 发送启动消息（包装在 try-catch 中，避免发送消息失败导致整个程序崩溃）
+        try {
+          await this.sendWelcomeMessage();
+        } catch (error) {
+          console.log('⚠️ 发送欢迎消息失败，但机器人继续运行');
+        }
       } else {
         logger.warn('未找到目标群聊', { targetName: config.TARGET_ROOM_NAME });
         console.log('⚠️ 未找到目标群聊，请检查群名称配置或手动查看群聊列表');
@@ -356,22 +360,33 @@ class SportsCheckinBot {
   }
 
   onError(error) {
-    // 过滤掉一些常见的非关键错误
-    if (error.message && error.message.includes('batchGetContact')) {
-      // 这些是 wechat4u 的已知问题，不是致命错误
+    // 增强的错误过滤：过滤掉所有 wechat4u 已知的非关键错误
+    if (error.message && (
+      error.message.includes('batchGetContact') ||
+      error.message.includes('1101 == 0') ||
+      error.message.includes('1102') ||
+      error.message.includes('AssertionError') ||
+      error.message.includes('连续3次同步失败')
+    )) {
+      // 这些都是 wechat4u 的已知问题，不是致命错误
+      // 只在调试模式下记录
+      console.log('🔧 过滤非关键错误:', error.message.substring(0, 50) + '...');
       return;
     }
     
     logger.error('机器人运行错误', error);
     console.error('❌ 机器人错误:', error.message);
     
-    // 如果是连接相关错误，尝试重连
-    if (this.retryCount < this.maxRetries) {
+    // 只有在真正严重的错误时才尝试重连
+    if (this.retryCount < this.maxRetries && 
+        error.message && 
+        !error.message.includes('wechat4u') &&
+        !error.message.includes('AssertionError')) {
       this.retryCount++;
       console.log(`🔄 尝试重连 (${this.retryCount}/${this.maxRetries})...`);
       setTimeout(() => {
         this.start();
-      }, 10000); // 10秒后重试
+      }, 30000); // 增加重试间隔到30秒
     }
   }
 
