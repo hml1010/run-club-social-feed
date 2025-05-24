@@ -1,4 +1,3 @@
-
 const fs = require('fs-extra');
 const path = require('path');
 const moment = require('moment');
@@ -87,15 +86,21 @@ class CheckinManager {
   async addCheckin(checkinData) {
     try {
       const data = await this.loadData();
+      
+      // 提取运动时间（支持多种格式）
+      const exerciseTime = this.extractExerciseTime(checkinData.message);
+      
       data.checkins.push({
         ...checkinData,
         id: this.generateId(),
+        exerciseTime: exerciseTime, // 新增运动时间字段（分钟）
         createdAt: new Date().toISOString()
       });
       await this.saveData(data);
       logger.info('记录打卡成功', { 
         userName: checkinData.userName, 
-        date: checkinData.date 
+        date: checkinData.date,
+        exerciseTime: exerciseTime 
       });
     } catch (error) {
       logger.error('添加打卡记录失败', error);
@@ -103,8 +108,151 @@ class CheckinManager {
     }
   }
 
-  generateId() {
-    return Date.now().toString(36) + Math.random().toString(36).substr(2);
+  extractExerciseTime(message) {
+    // 提取运动时间的正则表达式
+    const timePatterns = [
+      /(\d+(?:\.\d+)?)\s*小时/g,           // X小时
+      /(\d+(?:\.\d+)?)\s*h/gi,            // Xh
+      /(\d+)\s*分钟/g,                    // X分钟
+      /(\d+)\s*min/gi,                    // Xmin
+      /(\d+)\s*minutes?/gi,               // X minutes
+      /运动\s*(\d+(?:\.\d+)?)\s*小时/g,    // 运动X小时
+      /锻炼\s*(\d+)\s*分钟/g,             // 锻炼X分钟
+      /练习\s*(\d+)\s*分钟/g,             // 练习X分钟
+      /跑步\s*(\d+)\s*分钟/g,             // 跑步X分钟
+      /健身\s*(\d+)\s*分钟/g              // 健身X分钟
+    ];
+
+    let totalMinutes = 0;
+    
+    // 匹配小时
+    const hourMatches = message.match(/(\d+(?:\.\d+)?)\s*(?:小时|h)/gi);
+    if (hourMatches) {
+      hourMatches.forEach(match => {
+        const hours = parseFloat(match.match(/(\d+(?:\.\d+)?)/)[1]);
+        totalMinutes += hours * 60;
+      });
+    }
+
+    // 匹配分钟
+    const minuteMatches = message.match(/(\d+)\s*(?:分钟|min|minutes?)/gi);
+    if (minuteMatches) {
+      minuteMatches.forEach(match => {
+        const minutes = parseInt(match.match(/(\d+)/)[1]);
+        totalMinutes += minutes;
+      });
+    }
+
+    // 如果没有明确时间，根据关键词估算默认时间
+    if (totalMinutes === 0) {
+      if (message.includes('跑步') || message.includes('慢跑')) {
+        totalMinutes = 30; // 默认30分钟
+      } else if (message.includes('健身') || message.includes('力量训练')) {
+        totalMinutes = 60; // 默认60分钟
+      } else if (message.includes('网球') || message.includes('羽毛球')) {
+        totalMinutes = 60; // 默认60分钟
+      } else if (message.includes('游泳')) {
+        totalMinutes = 45; // 默认45分钟
+      } else {
+        totalMinutes = 30; // 其他运动默认30分钟
+      }
+    }
+
+    return Math.max(totalMinutes, 0); // 确保不返回负数
+  }
+
+  async getUserExerciseStats(userName) {
+    try {
+      const data = await this.loadData();
+      const userCheckins = data.checkins.filter(checkin => checkin.userName === userName);
+      
+      const totalTime = userCheckins.reduce((sum, checkin) => {
+        return sum + (checkin.exerciseTime || 0);
+      }, 0);
+
+      const weeklyTime = userCheckins
+        .filter(checkin => {
+          const oneWeekAgo = moment().subtract(7, 'days').format('YYYY-MM-DD');
+          return checkin.date >= oneWeekAgo;
+        })
+        .reduce((sum, checkin) => sum + (checkin.exerciseTime || 0), 0);
+
+      const monthlyTime = userCheckins
+        .filter(checkin => {
+          const oneMonthAgo = moment().subtract(30, 'days').format('YYYY-MM-DD');
+          return checkin.date >= oneMonthAgo;
+        })
+        .reduce((sum, checkin) => sum + (checkin.exerciseTime || 0), 0);
+
+      return {
+        totalTime: totalTime, // 总运动时间（分钟）
+        weeklyTime: weeklyTime, // 本周运动时间
+        monthlyTime: monthlyTime, // 本月运动时间
+        averageDaily: userCheckins.length > 0 ? Math.round(totalTime / userCheckins.length) : 0,
+        totalSessions: userCheckins.length
+      };
+    } catch (error) {
+      logger.error('获取用户运动统计失败', error);
+      return {
+        totalTime: 0,
+        weeklyTime: 0,
+        monthlyTime: 0,
+        averageDaily: 0,
+        totalSessions: 0
+      };
+    }
+  }
+
+  async getExerciseTimeRanking(period = 'weekly') {
+    try {
+      const data = await this.loadData();
+      let cutoffDate;
+      
+      if (period === 'weekly') {
+        cutoffDate = moment().subtract(7, 'days').format('YYYY-MM-DD');
+      } else if (period === 'monthly') {
+        cutoffDate = moment().subtract(30, 'days').format('YYYY-MM-DD');
+      } else {
+        cutoffDate = '1970-01-01'; // 全部时间
+      }
+      
+      const filteredCheckins = data.checkins.filter(
+        checkin => checkin.date >= cutoffDate
+      );
+      
+      const userTimes = {};
+      filteredCheckins.forEach(checkin => {
+        if (!userTimes[checkin.userName]) {
+          userTimes[checkin.userName] = 0;
+        }
+        userTimes[checkin.userName] += (checkin.exerciseTime || 0);
+      });
+      
+      return Object.entries(userTimes)
+        .map(([name, time]) => ({ 
+          name, 
+          time: time, // 分钟
+          hours: Math.round(time / 60 * 10) / 10 // 小时（保留1位小数）
+        }))
+        .sort((a, b) => b.time - a.time);
+    } catch (error) {
+      logger.error('获取运动时间排行榜失败', error);
+      return [];
+    }
+  }
+
+  formatTime(minutes) {
+    if (minutes < 60) {
+      return `${minutes}分钟`;
+    } else {
+      const hours = Math.floor(minutes / 60);
+      const remainingMinutes = minutes % 60;
+      if (remainingMinutes === 0) {
+        return `${hours}小时`;
+      } else {
+        return `${hours}小时${remainingMinutes}分钟`;
+      }
+    }
   }
 
   async hasCheckedToday(userName, date) {
@@ -358,6 +506,10 @@ class CheckinManager {
       logger.error('数据导出失败', error);
       throw error;
     }
+  }
+
+  generateId() {
+    return Date.now().toString(36) + Math.random().toString(36).substr(2);
   }
 }
 

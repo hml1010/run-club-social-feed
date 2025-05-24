@@ -1,4 +1,3 @@
-
 const { WechatyBuilder } = require('wechaty');
 const cron = require('node-cron');
 const moment = require('moment');
@@ -149,13 +148,14 @@ class SportsCheckinBot {
     const todayCount = await this.checkinManager.getTodayCount(today);
     const streak = await this.checkinManager.getUserStreak(userName);
     const totalMembers = await this.getTotalMembers();
+    const exerciseTime = this.checkinManager.extractExerciseTime(message);
     
     // 回复确认消息
-    const replyMessage = this.generateCheckinReply(userName, streak, todayCount, totalMembers);
+    const replyMessage = this.generateCheckinReply(userName, streak, todayCount, totalMembers, exerciseTime);
     await room.say(replyMessage);
   }
 
-  generateCheckinReply(userName, streak, todayCount, totalMembers) {
+  generateCheckinReply(userName, streak, todayCount, totalMembers, exerciseTime) {
     const encouragements = [
       '太棒了！', '真不错！', '坚持得很好！', '继续保持！', '加油！'
     ];
@@ -164,6 +164,11 @@ class SportsCheckinBot {
     let reply = `✅ @${userName} 打卡成功！${randomEncouragement}\n`;
     reply += `🔥 连续打卡: ${streak}天\n`;
     reply += `📊 今日群体打卡: ${todayCount}/${totalMembers}人\n`;
+    
+    // 添加运动时间信息
+    if (exerciseTime > 0) {
+      reply += `⏱️ 本次运动: ${this.checkinManager.formatTime(exerciseTime)}\n`;
+    }
     
     if (streak >= 7) {
       reply += `🏆 恭喜连续打卡一周！\n`;
@@ -191,6 +196,7 @@ class SportsCheckinBot {
     const today = moment().format('YYYY-MM-DD');
     const stats = await this.checkinManager.getTodayStats(today);
     const ranking = await this.checkinManager.getWeeklyRanking();
+    const timeRanking = await this.checkinManager.getExerciseTimeRanking('weekly');
     const totalMembers = await this.getTotalMembers();
     
     let message = `📊 今日打卡统计 (${moment().format('MM月DD日')})\n\n`;
@@ -201,11 +207,20 @@ class SportsCheckinBot {
     }
     
     if (ranking.length > 0) {
-      message += `🏆 本周排行榜:\n`;
-      ranking.slice(0, 5).forEach((user, index) => {
-        const medals = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣'];
-        const medal = medals[index] || '🔸';
+      message += `🏆 本周打卡排行榜:\n`;
+      ranking.slice(0, 3).forEach((user, index) => {
+        const medals = ['🥇', '🥈', '🥉'];
+        const medal = medals[index];
         message += `${medal} ${user.name}: ${user.count}次\n`;
+      });
+    }
+
+    if (timeRanking.length > 0) {
+      message += `\n⏱️ 本周运动时长排行:\n`;
+      timeRanking.slice(0, 3).forEach((user, index) => {
+        const medals = ['🏆', '🥈', '🥉'];
+        const medal = medals[index];
+        message += `${medal} ${user.name}: ${user.hours}小时\n`;
       });
     }
     
@@ -217,11 +232,19 @@ class SportsCheckinBot {
     const streak = await this.checkinManager.getUserStreak(userName);
     const weeklyCount = await this.checkinManager.getUserWeeklyCount(userName);
     const monthlyCount = await this.checkinManager.getUserMonthlyCount(userName);
+    const exerciseStats = await this.checkinManager.getUserExerciseStats(userName);
     
     let message = `📈 @${userName} 的个人统计:\n\n`;
     message += `🔥 连续打卡: ${streak}天\n`;
     message += `📅 本周打卡: ${weeklyCount}次\n`;
-    message += `📆 本月打卡: ${monthlyCount}次\n`;
+    message += `📆 本月打卡: ${monthlyCount}次\n\n`;
+    
+    // 新增运动时间统计
+    message += `⏱️ 运动时间统计:\n`;
+    message += `• 本周: ${this.checkinManager.formatTime(exerciseStats.weeklyTime)}\n`;
+    message += `• 本月: ${this.checkinManager.formatTime(exerciseStats.monthlyTime)}\n`;
+    message += `• 总计: ${this.checkinManager.formatTime(exerciseStats.totalTime)}\n`;
+    message += `• 平均每次: ${this.checkinManager.formatTime(exerciseStats.averageDaily)}\n`;
     
     if (streak >= 7) {
       message += `\n🎉 已坚持一周，真棒！`;
