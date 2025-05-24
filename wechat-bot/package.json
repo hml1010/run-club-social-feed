@@ -1,0 +1,21 @@
+
+{
+  "name": "sports-checkin-bot",
+  "version": "1.0.0",
+  "description": "老胡私董会运动打卡群机器人",
+  "main": "src/bot.js",
+  "scripts": {
+    "start": "node src/bot.js",
+    "dev": "nodemon src/bot.js"
+  },
+  "dependencies": {
+    "wechaty": "^1.20.2",
+    "wechaty-puppet-wechat": "^1.18.4",
+    "node-cron": "^3.0.2",
+    "moment": "^2.29.4",
+    "fs-extra": "^11.1.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}
