@@ -1,4 +1,3 @@
-
 const { WechatyBuilder } = require('wechaty');
 const cron = require('node-cron');
 const moment = require('moment');
@@ -13,12 +12,17 @@ class SportsCheckinBot {
   constructor() {
     this.bot = WechatyBuilder.build({
       name: 'sports-checkin-bot',
-      puppet: 'wechaty-puppet-wechat4u'
+      puppet: 'wechaty-puppet-wechat4u',
+      puppetOptions: {
+        uos: true  // 使用UOS协议，更稳定
+      }
     });
     
     this.checkinManager = new CheckinManager();
     this.targetRoom = null;
     this.isReady = false;
+    this.retryCount = 0;
+    this.maxRetries = 3;
     
     this.setupBot();
     this.setupScheduledTasks();
@@ -44,20 +48,57 @@ class SportsCheckinBot {
     logger.info('机器人登录成功', { user: user.name() });
     console.log(`✅ 机器人登录成功: ${user.name()}`);
     
-    // 查找目标群聊
-    const room = await this.bot.Room.find({ topic: config.TARGET_ROOM_NAME });
-    if (room) {
-      this.targetRoom = room;
-      this.isReady = true;
-      const roomTopic = await room.topic();
-      logger.info('找到目标群聊', { roomTopic });
-      console.log(`🎯 找到目标群聊: ${roomTopic}`);
+    // 重置重试计数
+    this.retryCount = 0;
+    
+    // 延迟查找目标群聊，给微信客户端时间加载数据
+    setTimeout(async () => {
+      await this.findTargetRoom();
+    }, 5000);
+  }
+
+  async findTargetRoom() {
+    try {
+      console.log(`🔍 正在查找群聊: ${config.TARGET_ROOM_NAME}`);
       
-      // 发送启动消息
-      await this.sendWelcomeMessage();
-    } else {
-      logger.warn('未找到目标群聊', { targetName: config.TARGET_ROOM_NAME });
-      console.log('⚠️ 未找到目标群聊，请检查群名称配置');
+      // 首先尝试精确匹配
+      let room = await this.bot.Room.find({ topic: config.TARGET_ROOM_NAME });
+      
+      if (!room) {
+        // 如果精确匹配失败，尝试模糊匹配
+        console.log('🔍 精确匹配失败，尝试模糊匹配...');
+        const rooms = await this.bot.Room.findAll();
+        console.log(`📋 找到 ${rooms.length} 个群聊`);
+        
+        for (const r of rooms) {
+          const topic = await r.topic();
+          console.log(`📝 群聊: ${topic}`);
+          
+          // 检查是否包含关键词
+          if (topic.includes('老胡') || topic.includes('私董会') || topic.includes('日课')) {
+            room = r;
+            console.log(`✅ 找到匹配的群聊: ${topic}`);
+            break;
+          }
+        }
+      }
+      
+      if (room) {
+        this.targetRoom = room;
+        this.isReady = true;
+        const roomTopic = await room.topic();
+        logger.info('找到目标群聊', { roomTopic });
+        console.log(`🎯 找到目标群聊: ${roomTopic}`);
+        
+        // 发送启动消息
+        await this.sendWelcomeMessage();
+      } else {
+        logger.warn('未找到目标群聊', { targetName: config.TARGET_ROOM_NAME });
+        console.log('⚠️ 未找到目标群聊，请检查群名称配置或手动查看群聊列表');
+      }
+    } catch (error) {
+      logger.error('查找群聊时出错', error);
+      console.error('❌ 查找群聊失败:', error.message);
     }
   }
 
@@ -315,8 +356,23 @@ class SportsCheckinBot {
   }
 
   onError(error) {
+    // 过滤掉一些常见的非关键错误
+    if (error.message && error.message.includes('batchGetContact')) {
+      // 这些是 wechat4u 的已知问题，不是致命错误
+      return;
+    }
+    
     logger.error('机器人运行错误', error);
-    console.error('❌ 机器人错误:', error);
+    console.error('❌ 机器人错误:', error.message);
+    
+    // 如果是连接相关错误，尝试重连
+    if (this.retryCount < this.maxRetries) {
+      this.retryCount++;
+      console.log(`🔄 尝试重连 (${this.retryCount}/${this.maxRetries})...`);
+      setTimeout(() => {
+        this.start();
+      }, 10000); // 10秒后重试
+    }
   }
 
   setupScheduledTasks() {

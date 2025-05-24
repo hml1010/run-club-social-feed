@@ -1,7 +1,7 @@
 
 module.exports = {
-  // 目标群聊名称（请修改为实际群名）
-  TARGET_ROOM_NAME: '老胡私董会运动打卡群',
+  // 目标群聊名称（根据日志中的实际群名更新）
+  TARGET_ROOM_NAME: '【老胡】私董会4.0日课]',
   
   // 打卡关键词
   CHECKIN_KEYWORDS: [
